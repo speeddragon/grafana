@@ -4,15 +4,15 @@ import { Scene } from '../components/Scene';
 import { SceneTimePicker } from '../components/SceneTimePicker';
 import { VizPanel } from '../components/VizPanel';
 import { SceneFlexLayout } from '../components/layout/SceneFlexLayout';
-import { SceneGridLayout } from '../components/layout/SceneGridLayout';
 import { SceneTimeRange } from '../core/SceneTimeRange';
 import { SceneEditManager } from '../editor/SceneEditManager';
 import { SceneQueryRunner } from '../querying/SceneQueryRunner';
+import { SceneGridstackLayout } from '../components/layout/SceneGridstackLayout';
 
 export function getGridLayoutTest(): Scene {
   const scene = new Scene({
     title: 'Grid layout test',
-    layout: new SceneGridLayout({
+    layout: new SceneGridstackLayout({
       children: [
         new VizPanel({
           isResizable: true,
@@ -22,7 +22,7 @@ export function getGridLayoutTest(): Scene {
           size: {
             x: 0,
             y: 0,
-            width: 12,
+            width: 6,
             height: 10,
           },
         }),
@@ -32,14 +32,14 @@ export function getGridLayoutTest(): Scene {
           title: 'No drag and no resize',
           isResizable: false,
           isDraggable: false,
-          size: { x: 12, y: 0, width: 12, height: 10 },
+          size: { x: 6, y: 0, width: 6, height: 10 },
         }),
 
         new SceneFlexLayout({
           direction: 'column',
           isDraggable: true,
           isResizable: true,
-          size: { x: 6, y: 11, width: 12, height: 10 },
+          size: { x: 0, y: 11, width: 12, height: 10 },
           children: [
             new VizPanel({
               size: { ySizing: 'fill' },

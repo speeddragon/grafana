@@ -5,7 +5,7 @@ import { Icon } from '@grafana/ui';
 export function SceneDragHandle({ layoutKey, className }: { layoutKey: string; className?: string }) {
   return (
     <div
-      className={`${className} grid-drag-handle-${layoutKey}`}
+      className={`${className} grid-drag-handle`}
       style={{
         width: '20px',
         height: '20px',

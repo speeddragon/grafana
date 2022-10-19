@@ -157,7 +157,11 @@ export abstract class SceneObjectBase<TState extends SceneObjectState = {}> impl
   }
 
   getLayout(): SceneObject<SceneLayoutState> {
-    if (this.constructor.name === 'SceneFlexLayout' || this.constructor.name === 'SceneGridLayout') {
+    if (
+      this.constructor.name === 'SceneFlexLayout' ||
+      this.constructor.name === 'SceneGridLayout' ||
+      this.constructor.name === 'SceneGridstackLayout'
+    ) {
       return this as SceneObject<SceneLayoutState>;
     }
 

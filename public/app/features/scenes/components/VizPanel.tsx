@@ -1,6 +1,6 @@
 import React from 'react';
-import AutoSizer from 'react-virtualized-auto-sizer';
-
+// import AutoSizer from 'react-virtualized-auto-sizer';
+import { useMeasure } from 'react-use';
 import { AbsoluteTimeRange, FieldConfigSource, toUtc } from '@grafana/data';
 import { PanelRenderer } from '@grafana/runtime';
 import { Field, PanelChrome, Input } from '@grafana/ui';
@@ -40,35 +40,32 @@ function ScenePanelRenderer({ model }: SceneComponentProps<VizPanel>) {
   const layout = model.getLayout();
   const isDraggable = layout.state.isDraggable ? state.isDraggable : false;
   const dragHandle = <SceneDragHandle layoutKey={layout.state.key!} />;
-
+  const [panel, panelMeasure] = useMeasure();
   return (
-    <AutoSizer>
-      {({ width, height }) => {
-        if (width < 3 || height < 3) {
-          return null;
-        }
-
-        return (
-          <PanelChrome title={title} width={width} height={height} leftItems={isDraggable ? [dragHandle] : undefined}>
-            {(innerWidth, innerHeight) => (
-              <>
-                <PanelRenderer
-                  title="Raw data"
-                  pluginId={pluginId}
-                  width={innerWidth}
-                  height={innerHeight}
-                  data={data}
-                  options={options}
-                  fieldConfig={fieldConfig}
-                  onOptionsChange={() => {}}
-                  onChangeTimeRange={model.onSetTimeRange}
-                />
-              </>
-            )}
-          </PanelChrome>
-        );
-      }}
-    </AutoSizer>
+    <div style={{ width: '100%', height: '100%' }} ref={panel}>
+      <PanelChrome
+        title={title}
+        width={panelMeasure.width}
+        height={panelMeasure.height}
+        leftItems={isDraggable ? [dragHandle] : undefined}
+      >
+        {(innerWidth, innerHeight) => (
+          <>
+            <PanelRenderer
+              title="Raw data"
+              pluginId={pluginId}
+              width={innerWidth}
+              height={innerHeight}
+              data={data}
+              options={options}
+              fieldConfig={fieldConfig}
+              onOptionsChange={() => {}}
+              onChangeTimeRange={model.onSetTimeRange}
+            />
+          </>
+        )}
+      </PanelChrome>
+    </div>
   );
 }
 

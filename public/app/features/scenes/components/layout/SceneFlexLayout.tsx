@@ -26,7 +26,7 @@ function FlexLayoutRenderer({ model, isEditing }: SceneComponentProps<SceneFlexL
   const { direction = 'row', children } = model.useState();
 
   return (
-    <div style={{ flexGrow: 1, flexDirection: direction, display: 'flex', gap: '8px' }}>
+    <div style={{ flexGrow: 1, flexDirection: direction, display: 'flex', gap: '8px', height: '100%' }}>
       {children.map((item) => (
         <FlexLayoutChildComponent key={item.state.key} item={item} direction={direction} isEditing={isEditing} />
       ))}

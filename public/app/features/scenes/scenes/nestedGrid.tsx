@@ -3,33 +3,33 @@ import { getDefaultTimeRange } from '@grafana/data';
 import { Scene } from '../components/Scene';
 import { SceneTimePicker } from '../components/SceneTimePicker';
 import { VizPanel } from '../components/VizPanel';
-import { SceneGridLayout, SceneGridRow } from '../components/layout/SceneGridLayout';
 import { SceneTimeRange } from '../core/SceneTimeRange';
 import { SceneEditManager } from '../editor/SceneEditManager';
 import { SceneQueryRunner } from '../querying/SceneQueryRunner';
+import { SceneGridstackLayout, SceneGridRow } from '../components/layout/SceneGridstackLayout';
 
 export function getGridNestedTest(): Scene {
   const row = new SceneGridRow({
     title: 'Nested grid layout',
     size: { x: 0, y: 0, height: 11 },
     children: [
-      new SceneGridLayout({
+      new SceneGridstackLayout({
         children: [
           new VizPanel({
-            size: { x: 0, y: 0, width: 12, height: 10 },
+            size: { x: 0, y: 0, width: 6, height: 10 },
             isDraggable: true,
             pluginId: 'timeseries',
             title: 'Test Panel',
           }),
           new VizPanel({
-            size: { x: 12, y: 0, width: 12, height: 5 },
+            size: { x: 6, y: 0, width: 6, height: 5 },
             isDraggable: true,
             pluginId: 'timeseries',
             title: 'Test Panel',
           }),
           new VizPanel({
             isDraggable: true,
-            size: { x: 12, y: 5, width: 12, height: 5 },
+            size: { x: 6, y: 5, width: 6, height: 5 },
             pluginId: 'timeseries',
             title: 'Test Panel',
           }),
@@ -42,7 +42,7 @@ export function getGridNestedTest(): Scene {
     size: {
       x: 0,
       y: 11,
-      width: 12,
+      width: 6,
       height: 10,
     },
     isDraggable: true,
@@ -52,26 +52,26 @@ export function getGridNestedTest(): Scene {
 
   const cell2 = new VizPanel({
     size: {
-      x: 12,
+      x: 6,
       y: 11,
-      width: 12,
+      width: 6,
       height: 10,
     },
     isDraggable: true,
     pluginId: 'timeseries',
-    title: 'Cell 1',
+    title: 'Cell 2',
   });
 
   const scene = new Scene({
     title: 'Grid nested test',
-    layout: new SceneGridLayout({
+    layout: new SceneGridstackLayout({
       children: [
         row,
-        new SceneGridLayout({
+        new SceneGridstackLayout({
           size: {
             x: 0,
             y: 0,
-            width: 24,
+            width: 12,
             height: 10,
           },
           children: [cell1, cell2],

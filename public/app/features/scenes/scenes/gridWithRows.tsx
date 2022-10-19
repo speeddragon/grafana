@@ -8,6 +8,7 @@ import { SceneGridLayout, SceneGridRow } from '../components/layout/SceneGridLay
 import { SceneTimeRange } from '../core/SceneTimeRange';
 import { SceneEditManager } from '../editor/SceneEditManager';
 import { SceneQueryRunner } from '../querying/SceneQueryRunner';
+import { SceneGridstackLayout } from '../components/layout/SceneGridstackLayout';
 
 export function getGridWithRowsTest(): Scene {
   const panel = new VizPanel({
@@ -78,7 +79,7 @@ export function getGridWithRowsTest(): Scene {
   });
   const scene = new Scene({
     title: 'Grid rows test',
-    layout: new SceneGridLayout({
+    layout: new SceneGridstackLayout({
       children: [cell1, cell2, row1, row2],
     }),
     $editor: new SceneEditManager({}),

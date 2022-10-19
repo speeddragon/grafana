@@ -23370,6 +23370,7 @@ __metadata:
     framework-utils: ^1.1.0
     fs-extra: 10.1.0
     glob: 8.0.3
+    gridstack: ^7.0.1
     history: 4.10.1
     hoist-non-react-statics: 3.3.2
     html-loader: 4.2.0
@@ -23518,6 +23519,13 @@ __metadata:
   version: 16.6.0
   resolution: "graphql@npm:16.6.0"
   checksum: bf1d9e3c1938ce3c1a81e909bd3ead1ae4707c577f91cff1ca2eca474bfbc7873d5d7b942e1e9777ff5a8304421dba57a4b76d7a29eb19de8711cb70e3c2415e
+  languageName: node
+  linkType: hard
+
+"gridstack@npm:^7.0.1":
+  version: 7.0.1
+  resolution: "gridstack@npm:7.0.1"
+  checksum: 2d2079a2b894d4d78f5b1c79364fbcf304075149cd0514b8b69d6ba7ff112cb15740e26ddf95a2a1eba7a0c7f8036afee41a3d639fbce729e1bfc7e7ae1e4f3c
   languageName: node
   linkType: hard
 
