@@ -1,6 +1,13 @@
 import { css, cx } from '@emotion/css';
-import React, { createRef, useEffect, useRef } from 'react';
-import { GridStack } from 'gridstack';
+import React, { Children, createRef, useEffect, useRef } from 'react';
+import {
+  GridItemHTMLElement,
+  GridStack,
+  GridStackEventHandlerCallback,
+  GridStackEvent,
+  GridStackElement,
+  GridStackNode,
+} from 'gridstack';
 import 'gridstack/dist/gridstack.min.css';
 
 import { GrafanaTheme2 } from '@grafana/data';
@@ -8,16 +15,13 @@ import { Icon, useStyles2, useTheme2 } from '@grafana/ui';
 import { DEFAULT_ROW_HEIGHT, GRID_CELL_HEIGHT, GRID_CELL_VMARGIN, GRID_COLUMN_COUNT } from 'app/core/constants';
 
 import { SceneObjectBase } from '../../core/SceneObjectBase';
-import {
-  SceneComponentProps,
-  SceneLayoutChild,
-  SceneLayoutChildState,
-  SceneLayoutState,
-  SceneObject,
-} from '../../core/types';
+import { SceneComponentProps, SceneLayoutChildState, SceneLayoutState, SceneObject } from '../../core/types';
 import { SceneDragHandle } from '../SceneDragHandle';
+import { GridLayoutDragStartEvent, GridLayoutDropEvent } from '../../core/events';
 
-interface SceneGridLayoutState extends SceneLayoutState {}
+interface SceneGridLayoutState extends SceneLayoutState {
+  draggingItem: SceneObject;
+}
 
 type GridCellLayout = {
   x: number;
@@ -36,54 +40,129 @@ export class SceneGridstackLayout extends SceneObjectBase<SceneGridLayoutState> 
     });
   }
 
+  activate() {
+    this.getRoot().events.subscribe(GridLayoutDragStartEvent, ({ payload }) => {
+      this.setState({ draggingItem: payload.sceneObject });
+    });
+
+    // this.getRoot().events.subscribe(GridLayoutDropEvent, ({ payload }) => {
+    //   const droppedItem = payload.sceneObject;
+    //   // Remove element if previous was on this grid
+    //   const previousChild = this.state.children.find((c) => c.state.key === droppedItem.state.key);
+    //   if (previousChild) {
+    //     this.setState({ children: this.state.children.filter((child) => child.state.key !== previousChild.state.key) });
+    //     return;
+    //   }
+    //   this.setState({ draggingItem: undefined });
+    // });
+  }
+
   updateLayout() {
+    /**
+     * This forces a re-render through updating the state
+     */
     this.setState({
       children: [...this.state.children],
     });
   }
 
-  onResizeStop: ReactGridLayout.ItemCallback = (_, o, n) => {
-    const child = this.state.children.find((c) => c.state.key === n.i);
+  getElementSize(el: GridItemHTMLElement) {
+    return {
+      w: parseInt(el.getAttribute('gs-w') || '0', 10),
+      h: parseInt(el.getAttribute('gs-h') || '0', 10),
+      x: parseInt(el.getAttribute('gs-x') || '0', 10),
+      y: parseInt(el.getAttribute('gs-y') || '0', 10),
+    };
+  }
+
+  getElementKey(el: GridItemHTMLElement) {
+    if (!el || (!el.getAttribute && typeof el === 'string')) {
+      return null;
+    }
+
+    return el.getAttribute('gs-id');
+  }
+
+  onResizeStop: GridStackEventHandlerCallback = (event, el) => {
+    const child = this.state.children.find((c) => c.state.key === this.getElementKey(el));
     if (!child) {
       return;
     }
+    const newSize = this.getElementSize(el);
+
     child.setState({
       size: {
         ...child.state.size,
-        width: n.w,
-        height: n.h,
+        width: newSize.w,
+        height: newSize.h,
       },
     });
   };
 
-  onDragStop: ReactGridLayout.ItemCallback = (l, o, n) => {
+  onDragStart: GridStackEventHandlerCallback = (event, el) => {
     // Update children positions if they have changed
-    for (let i = 0; i < l.length; i++) {
-      const child = this.state.children[i];
-      const childSize = child.state.size;
-      const childLayout = l[i];
-      if (
-        childSize?.x !== childLayout.x ||
-        childSize?.y !== childLayout.y ||
-        childSize?.width !== childLayout.w ||
-        childSize?.height !== childLayout.h
-      ) {
-        child.setState({
-          size: {
-            ...child.state.size,
-            x: childLayout.x,
-            y: childLayout.y,
-          },
-        });
-      }
+    const child = this.state.children.find((c) => c.state.key === this.getElementKey(el));
+    if (!child) {
+      return;
     }
+    this.getRoot().events.publish(new GridLayoutDragStartEvent({ sceneObject: child }));
+  };
 
-    this.updateLayout();
+  onDragStop: GridStackEventHandlerCallback = (event, el, newEl) => {
+    // Update children positions if they have changed
+    const child = this.state.children.find((c) => c.state.key === this.getElementKey(el));
+    if (!child) {
+      return;
+    }
+    const childSize = child.state.size;
+    const childLayout = this.getElementSize(el);
+
+    if (
+      childSize?.x !== childLayout.x ||
+      childSize?.y !== childLayout.y ||
+      childSize?.width !== childLayout.w ||
+      childSize?.height !== childLayout.h
+    ) {
+      child.setState({
+        size: {
+          ...child.state.size,
+          x: childLayout.x,
+          y: childLayout.y,
+        },
+      });
+    }
+  };
+
+  onDrop = (event: Event, previousEl: GridStackNode, newEl: GridStackNode) => {
+    // Remove element if previous was on this grid
+    const newChild = this.state.draggingItem;
+    this.getRoot().events.publish(new GridLayoutDropEvent({ sceneObject: newChild }));
+
+    this.setState({ children: [...this.state.children, newChild] });
+  };
+
+  onAddItem = (event: Event, newEl: GridStackNode) => {
+    // Remove element if previous was on this grid
+    if (this.state.draggingItem) {
+      this.setState({ children: [...this.state.children, this.state.draggingItem], draggingItem: undefined });
+    }
+  };
+
+  onRemoveItem = (event: Event, previousEl: GridStackNode) => {
+    // Remove dragging item if previous was on this grid
+    const previousChild = this.state.children.find((c) => c.state.key === previousEl.id);
+
+    if (previousChild && this.state.draggingItem) {
+      this.setState({
+        children: this.state.children.filter((child) => child.state.key !== previousChild.state.key),
+        draggingItem: undefined,
+      });
+      return;
+    }
   };
 }
 
-function SceneGridLayoutRenderer({ model }: SceneComponentProps<SceneGridLayout>) {
-  const theme = useTheme2();
+function SceneGridLayoutRenderer({ model }: SceneComponentProps<SceneGridstackLayout>) {
   const { children } = model.useState();
   const refs = useRef({});
 
@@ -96,21 +175,32 @@ function SceneGridLayoutRenderer({ model }: SceneComponentProps<SceneGridLayout>
   useEffect(() => {
     const grid = GridStack.init(
       {
+        // TODO: Use 24 cols
+        column: 12,
         cellHeight: GRID_CELL_HEIGHT,
         cellHeightUnit: 'px',
         margin: GRID_CELL_VMARGIN / 2,
         acceptWidgets: true,
-        // handleClass: `grid-drag-handle`,
         draggable: {
           handle: '.grid-drag-handle',
           pause: true,
         },
-        // handle: `.grid-drag-handle`,
-        // handleClass: `grid-drag-handle`,
       },
       `.grid-stack-${model.state.key}`
     );
 
+    grid.on('dragstop', model.onDragStop);
+    grid.on('dragstart', model.onDragStart);
+    grid.on('resizestop', model.onResizeStop);
+
+    // grid.on('dropped', model.onDrop);
+
+    grid.on('added', model.onAddItem);
+    grid.on('removed', model.onRemoveItem);
+
+    grid.removeAll(false);
+
+    // Make this declarative
     // grid.load(
     //   children.map((child) => {
     //     return {
@@ -121,25 +211,10 @@ function SceneGridLayoutRenderer({ model }: SceneComponentProps<SceneGridLayout>
     //     };
     //   })
     // );
-    grid.removeAll(false);
     children.forEach(({ state }) => {
       grid.makeWidget(refs.current[state.key].current);
     });
-
-    grid.on('dropped', (e, p, n) => {
-      console.log(n);
-      debugger;
-    });
   }, [children]);
-
-  // Dev only, to be removed
-  // const background = generateGridBackground({
-  //   cellSize: { width: (width - 23 * GRID_CELL_VMARGIN) / 24, height: GRID_CELL_HEIGHT },
-  //   margin: [GRID_CELL_VMARGIN, GRID_CELL_VMARGIN],
-  //   cols: 24,
-  //   gridWidth: width,
-  //   theme,
-  // });
 
   return (
     /**
@@ -148,13 +223,14 @@ function SceneGridLayoutRenderer({ model }: SceneComponentProps<SceneGridLayout>
      * has a width of 0 and will let its content overflow its div.
      */
     // <div style={{ width: `${width}px`, height: '100%', background }}>
-    <div className={`grid-stack grid-stack-${model.state.key}`} style={{ width: '100%' }}>
+    <div className={`grid-stack grid-stack-${model.state.key}`} style={{ width: '100%', border: '1px solid green' }}>
       {children?.map((item, i) => {
         return (
           <div
             ref={refs.current[item.state.key!]}
             key={item.state.key}
             className="grid-stack-item"
+            gs-id={item.state.key}
             gs-w={item.state.size.width}
             gs-h={item.state.size.height}
             gs-x={item.state.size.x}
@@ -342,17 +418,17 @@ export function generateGridBackground({
   return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
 }
 
-function validateChildrenSize(children: SceneLayoutChild[]) {
-  if (
-    children.find(
-      (c) =>
-        !c.state.size ||
-        c.state.size.height === undefined ||
-        c.state.size.width === undefined ||
-        c.state.size.x === undefined ||
-        c.state.size.y === undefined
-    )
-  ) {
-    throw new Error('All children must have a size specified');
-  }
-}
+// function validateChildrenSize(children: SceneLayoutChild[]) {
+//   if (
+//     children.find(
+//       (c) =>
+//         !c.state.size ||
+//         c.state.size.height === undefined ||
+//         c.state.size.width === undefined ||
+//         c.state.size.x === undefined ||
+//         c.state.size.y === undefined
+//     )
+//   ) {
+//     throw new Error('All children must have a size specified');
+//   }
+// }

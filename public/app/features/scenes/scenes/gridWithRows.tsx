@@ -4,7 +4,7 @@ import { Scene } from '../components/Scene';
 import { SceneTimePicker } from '../components/SceneTimePicker';
 import { VizPanel } from '../components/VizPanel';
 import { SceneFlexLayout } from '../components/layout/SceneFlexLayout';
-import { SceneGridLayout, SceneGridRow } from '../components/layout/SceneGridLayout';
+import { SceneGridRow } from '../components/layout/SceneGridLayout';
 import { SceneTimeRange } from '../core/SceneTimeRange';
 import { SceneEditManager } from '../editor/SceneEditManager';
 import { SceneQueryRunner } from '../querying/SceneQueryRunner';

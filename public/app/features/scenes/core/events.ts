@@ -12,3 +12,19 @@ export interface SceneObjectStateChangedPayload {
 export class SceneObjectStateChangedEvent extends BusEventWithPayload<SceneObjectStateChangedPayload> {
   static type = 'scene-object-state-change';
 }
+
+export interface GridLayoutDropPayload {
+  sceneObject: SceneObject;
+}
+
+export class GridLayoutDropEvent extends BusEventWithPayload<GridLayoutDropPayload> {
+  static type = 'grid-layout-drop';
+}
+
+export interface GridLayoutDragStartPayload {
+  sceneObject: SceneObject;
+}
+
+export class GridLayoutDragStartEvent extends BusEventWithPayload<GridLayoutDropPayload> {
+  static type = 'grid-layout-drag-start';
+}

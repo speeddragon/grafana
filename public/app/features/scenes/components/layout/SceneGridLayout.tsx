@@ -177,7 +177,7 @@ function SceneGridLayoutRenderer({ model }: SceneComponentProps<SceneGridLayout>
            * in an element that has the calculated size given by the AutoSizer. The AutoSizer
            * has a width of 0 and will let its content overflow its div.
            */
-          <div style={{ width: `${width}px`, height: '100%', background }}>
+          <div style={{ width: `${width}px`, height: '100%', background, border: '1px solid green' }}>
             <ReactGridLayout
               width={width}
               /*
