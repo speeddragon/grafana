@@ -641,15 +641,10 @@ def codespell_step():
 def package_step(edition, ver_mode, include_enterprise2=False, variants=None):
     deps = [
         'build-plugins',
-        'build-backend',
+        'build-backend' + enterprise2_suffix(edition),
         'build-frontend',
         'build-frontend-packages',
     ]
-    if include_enterprise2:
-        sfx = '-enterprise2'
-        deps.extend([
-            'build-backend' + sfx,
-        ])
 
     variants_str = ''
     if variants:

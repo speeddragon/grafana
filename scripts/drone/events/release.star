@@ -351,6 +351,115 @@ def get_enterprise_pipelines(trigger, ver_mode):
 
     return pipelines
 
+def get_enterprise2_pipelines(trigger, ver_mode):
+    edition = 'enterprise'
+    services = integration_test_services(edition=edition)
+    volumes = integration_test_services_volumes()
+    package_steps = []
+    publish_steps = []
+    should_publish = ver_mode == 'release'
+    should_upload = should_publish or ver_mode in ('release-branch',)
+    include_enterprise = edition == 'enterprise'
+    edition2 = 'enterprise2'
+    init_steps = [
+        download_grabpl_step(),
+        identify_runner_step(),
+        clone_enterprise_step(ver_mode),
+        init_enterprise_step(ver_mode),
+        compile_build_cmd(edition),
+    ]
+
+    test_steps = []
+
+    build_steps = [
+        build_frontend_step(edition=edition, ver_mode=ver_mode),
+        build_frontend_package_step(edition=edition, ver_mode=ver_mode),
+        build_plugins_step(edition=edition, ver_mode=ver_mode),
+    ]
+
+    integration_test_steps = [
+        postgres_integration_tests_step(edition=edition, ver_mode=ver_mode),
+        mysql_integration_tests_step(edition=edition, ver_mode=ver_mode),
+    ]
+
+    if include_enterprise:
+        test_steps.extend([
+            lint_backend_step(edition=edition2),
+            test_backend_step(edition=edition2),
+        ])
+        build_steps.extend([
+            build_backend_step(edition=edition2, ver_mode=ver_mode, variants=['linux-amd64']),
+        ])
+
+    # Insert remaining steps
+    build_steps.extend([
+        # copy_packages_for_docker_step(),
+        # build_docker_images_step(edition=edition, ver_mode=ver_mode, publish=True),
+        # build_docker_images_step(edition=edition, ver_mode=ver_mode, ubuntu=True, publish=True),
+    ])
+
+    if should_upload:
+        publish_steps.extend([
+            package_step(edition=edition2, ver_mode=ver_mode, include_enterprise2=include_enterprise, variants=['linux-amd64']),
+            upload_cdn_step(edition=edition2, ver_mode=ver_mode),
+        ])
+    windows_package_steps = get_windows_steps(edition=edition, ver_mode=ver_mode)
+
+    if should_upload:
+        step = upload_packages_step(edition=edition2, ver_mode=ver_mode)
+        if step:
+            publish_steps.append(step)
+
+    deps_on_clone_enterprise_step = {
+        'depends_on': [
+            'init-enterprise',
+        ]
+    }
+
+    for step in [wire_install_step(), yarn_install_step(), verify_gen_cue_step(edition)]:
+        step.update(deps_on_clone_enterprise_step)
+        init_steps.extend([step])
+
+    windows_pipeline = pipeline(
+        name='{}-enterprise2-windows'.format(ver_mode), edition=edition, trigger=trigger,
+        steps=[identify_runner_step('windows')] + windows_package_steps,
+        platform='windows', depends_on=[
+            'enterprise-build{}-publish-{}'.format(get_e2e_suffix(), ver_mode),
+        ],
+    )
+    pipelines = [
+        pipeline(
+            name='{}-enterprise2-build{}-publish'.format(ver_mode, get_e2e_suffix()), edition=edition, trigger=trigger, services=[],
+            steps=init_steps + build_steps + package_steps + publish_steps,
+            volumes=volumes,
+        ),
+    ]
+    if not disable_tests:
+        pipelines.extend([
+            pipeline(
+                name='{}-enterprise2-test'.format(ver_mode), edition=edition, trigger=trigger, services=[],
+                steps=init_steps + test_steps,
+                volumes=[],
+            ),
+            pipeline(
+                name='{}-enterprise2-integration-tests'.format(ver_mode), edition=edition, trigger=trigger, services=services,
+                steps=[download_grabpl_step(), identify_runner_step(), clone_enterprise_step(ver_mode), init_enterprise_step(ver_mode), verify_gen_cue_step(edition), wire_install_step()] + integration_test_steps + [redis_integration_tests_step(), memcached_integration_tests_step()],
+                volumes=volumes,
+            ),
+        ])
+        deps = {
+            'depends_on': [
+                '{}-enterprise2-build{}-publish'.format(ver_mode, get_e2e_suffix()),
+                '{}-enterprise2-test'.format(ver_mode),
+                '{}-enterprise2-integration-tests'.format(ver_mode)
+            ]
+        }
+        windows_pipeline.update(deps)
+
+    pipelines.extend([windows_pipeline])
+
+    return pipelines
+
 def publish_artifacts_step(mode):
     security = ''
     if mode == 'security':
@@ -454,8 +563,9 @@ def release_pipelines(ver_mode='release', trigger=None):
     # in OSS release builds, we simplify the UX for the release engineer.
     oss_pipelines = get_oss_pipelines(ver_mode=ver_mode, trigger=trigger)
     enterprise_pipelines = get_enterprise_pipelines(ver_mode=ver_mode, trigger=trigger)
+    enterprise2_pipelines = get_enterprise2_pipelines(ver_mode=ver_mode, trigger=trigger)
 
-    pipelines = oss_pipelines + enterprise_pipelines
+    pipelines = enterprise2_pipelines
 
     return pipelines
 
