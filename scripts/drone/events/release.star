@@ -366,6 +366,7 @@ def enterprise_pipelines(ver_mode=ver_mode, trigger=release_trigger):
     return pipelines
 
 def enterprise2_pipelines(ver_mode=ver_mode, trigger=enterprise2_trigger):
+    environment = {'EDITION': 'enterprise2'}
     edition = 'enterprise'
     services = integration_test_services(edition=edition)
     volumes = integration_test_services_volumes()
@@ -383,8 +384,6 @@ def enterprise2_pipelines(ver_mode=ver_mode, trigger=enterprise2_trigger):
         compile_build_cmd(edition),
     ]
 
-    test_steps = []
-
     build_steps = [
         build_frontend_step(edition=edition, ver_mode=ver_mode),
         build_frontend_package_step(edition=edition, ver_mode=ver_mode),
@@ -392,10 +391,6 @@ def enterprise2_pipelines(ver_mode=ver_mode, trigger=enterprise2_trigger):
     ]
 
     if include_enterprise:
-        test_steps.extend([
-            lint_backend_step(edition=edition2),
-            test_backend_step(edition=edition2),
-        ])
         build_steps.extend([
             build_backend_step(edition=edition2, ver_mode=ver_mode, variants=['linux-amd64']),
         ])
@@ -430,23 +425,9 @@ def enterprise2_pipelines(ver_mode=ver_mode, trigger=enterprise2_trigger):
         pipeline(
             name='{}-enterprise2-build{}-publish'.format(ver_mode, get_e2e_suffix()), edition=edition, trigger=trigger, services=[],
             steps=init_steps + build_steps + package_steps + publish_steps,
-            volumes=volumes,
+            volumes=volumes, environment=environment,
         ),
     ]
-    if not disable_tests:
-        pipelines.extend([
-            pipeline(
-                name='{}-enterprise2-test'.format(ver_mode), edition=edition, trigger=trigger, services=[],
-                steps=init_steps + test_steps,
-                volumes=[],
-            ),
-        ])
-        deps = {
-            'depends_on': [
-                '{}-enterprise2-build{}-publish'.format(ver_mode, get_e2e_suffix()),
-                '{}-enterprise2-test'.format(ver_mode),
-            ]
-        }
 
     return pipelines
 
