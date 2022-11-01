@@ -779,6 +779,13 @@ def build_docker_images_step(edition, ver_mode, archs=None, ubuntu=False, publis
     if archs:
         cmd += ' -archs {}'.format(','.join(archs))
 
+    environment = {
+        'GCP_KEY': from_secret('gcp_key'),
+    }
+
+    if edition == 'enterprise2':
+        environment.update({'DOCKER_ENTERPRISE2_REPO': from_secret('docker_enterprise2_repo')})
+
     return {
         'name': 'build-docker-images' + ubuntu_sfx,
         'image': 'google/cloud-sdk',
@@ -793,9 +800,7 @@ def build_docker_images_step(edition, ver_mode, archs=None, ubuntu=False, publis
             'name': 'docker',
             'path': '/var/run/docker.sock'
         }],
-        'environment': {
-            'GCP_KEY': from_secret('gcp_key'),
-        },
+        'environment': environment
     }
 
 def fetch_images_step(edition):

@@ -3510,6 +3510,8 @@ steps:
   - copy-packages-for-docker
   - compile-build-cmd
   environment:
+    DOCKER_ENTERPRISE2_REPO:
+      from_secret: docker_enterprise2_repo
     GCP_KEY:
       from_secret: gcp_key
   image: google/cloud-sdk
@@ -5761,6 +5763,8 @@ steps:
   - copy-packages-for-docker
   - compile-build-cmd
   environment:
+    DOCKER_ENTERPRISE2_REPO:
+      from_secret: docker_enterprise2_repo
     GCP_KEY:
       from_secret: gcp_key
   image: google/cloud-sdk
@@ -6030,6 +6034,6 @@ kind: secret
 name: packages_secret_access_key
 ---
 kind: signature
-hmac: d858e1a3d82c327eed8fc2d1dd2df45da044445e0423c3b74c37446ad2c09223
+hmac: d583cb31d7b9ff46cff71f98edacba66ac2af9936e7a9a1571497e914f581fed
 
 ...

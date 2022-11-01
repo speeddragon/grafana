@@ -366,7 +366,9 @@ def enterprise_pipelines(ver_mode=ver_mode, trigger=release_trigger):
     return pipelines
 
 def enterprise2_pipelines(ver_mode=ver_mode, trigger=enterprise2_trigger):
-    environment = {'EDITION': 'enterprise2'}
+    environment = {
+        'EDITION': 'enterprise2',
+    }
     edition = 'enterprise'
     services = integration_test_services(edition=edition)
     volumes = integration_test_services_volumes()
