@@ -393,6 +393,7 @@ def get_enterprise2_pipelines(trigger, ver_mode):
         copy_packages_for_docker_step(edition=edition2),
         build_docker_images_step(edition=edition2, ver_mode=ver_mode, publish=True),
         build_docker_images_step(edition=edition2, ver_mode=ver_mode, ubuntu=True, publish=True),
+        fetch_images_step(edition2),
     ])
 
     if should_upload:

@@ -2054,6 +2054,22 @@ steps:
   - name: docker
     path: /var/run/docker.sock
 - commands:
+  - ./bin/build artifacts docker fetch --edition enterprise2
+  depends_on:
+  - compile-build-cmd
+  environment:
+    DOCKER_PASSWORD:
+      from_secret: docker_password
+    DOCKER_USER:
+      from_secret: docker_username
+    GCP_KEY:
+      from_secret: gcp_key
+  image: google/cloud-sdk
+  name: fetch-images-enterprise2
+  volumes:
+  - name: docker
+    path: /var/run/docker.sock
+- commands:
   - ./bin/grabpl upload-packages --edition enterprise2
   depends_on:
   - package-enterprise2
@@ -3005,6 +3021,22 @@ steps:
   - name: docker
     path: /var/run/docker.sock
 - commands:
+  - ./bin/build artifacts docker fetch --edition enterprise2
+  depends_on:
+  - compile-build-cmd
+  environment:
+    DOCKER_PASSWORD:
+      from_secret: docker_password
+    DOCKER_USER:
+      from_secret: docker_username
+    GCP_KEY:
+      from_secret: gcp_key
+  image: google/cloud-sdk
+  name: fetch-images-enterprise2
+  volumes:
+  - name: docker
+    path: /var/run/docker.sock
+- commands:
   - ./bin/grabpl upload-packages --edition enterprise2
   depends_on:
   - package-enterprise2
@@ -3352,6 +3384,6 @@ kind: secret
 name: packages_secret_access_key
 ---
 kind: signature
-hmac: a890d6aeec2cd333685c5953b3cbac4a52ffa66a91c7ccb8e2166baeef9a9890
+hmac: 688aaafdac970d0d39f094a85956a8fb55634ac9a24c25272c539fa6332e6701
 
 ...
