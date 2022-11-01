@@ -386,14 +386,15 @@ def get_enterprise2_pipelines(trigger, ver_mode):
             build_backend_step(edition=edition2, ver_mode=ver_mode, variants=['linux-amd64']),
         ])
 
+    fetch_images = fetch_images_step(edition2)
+    fetch_images.update({'depends_on': ['build-docker-images',]})
 
     build_steps.extend([
         package_step(edition=edition2, ver_mode=ver_mode, include_enterprise2=include_enterprise, variants=['linux-amd64']),
         upload_cdn_step(edition=edition2, ver_mode=ver_mode),
         copy_packages_for_docker_step(edition=edition2),
         build_docker_images_step(edition=edition2, ver_mode=ver_mode, publish=True),
-        build_docker_images_step(edition=edition2, ver_mode=ver_mode, ubuntu=True, publish=True),
-        fetch_images_step(edition2),
+        fetch_images,
     ])
 
     if should_upload:
@@ -540,7 +541,7 @@ def release_pipelines(ver_mode='release', trigger=None):
     enterprise_pipelines = get_enterprise_pipelines(ver_mode=ver_mode, trigger=trigger)
     enterprise2_pipelines = get_enterprise2_pipelines(ver_mode=ver_mode, trigger=trigger)
 
-    pipelines = enterprise2_pipelines
+    pipelines = oss_pipelines + enterprise_pipelines + enterprise2_pipelines
 
     return pipelines
 
