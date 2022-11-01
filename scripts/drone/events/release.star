@@ -73,6 +73,21 @@ load(
 
 load('scripts/drone/vault.star', 'from_secret', 'github_token', 'pull_secret', 'drone_token', 'prerelease_bucket')
 
+ver_mode='release'
+release_trigger = {
+    'event': {
+        'exclude': [
+            'promote'
+        ]
+    },
+    'ref': ['refs/tags/v*',],
+}
+enterprise2_trigger = {
+    'event': ['promote'],
+    'target': ['hg'],
+    'ref': ['refs/tags/v*',],
+}
+
 def store_npm_packages_step():
     return {
         'name': 'store-npm-packages',
@@ -122,7 +137,7 @@ def release_npm_packages_step():
         ],
     }
 
-def get_oss_pipelines(trigger, ver_mode):
+def oss_pipelines(ver_mode=ver_mode, trigger=release_trigger):
     environment = {'EDITION': 'oss'}
     edition = 'oss'
     services = integration_test_services(edition=edition)
@@ -223,7 +238,7 @@ def get_oss_pipelines(trigger, ver_mode):
     pipelines.extend([windows_pipeline])
     return pipelines
 
-def get_enterprise_pipelines(trigger, ver_mode):
+def enterprise_pipelines(ver_mode=ver_mode, trigger=release_trigger):
     environment = {'EDITION': 'enterprise'}
     edition = 'enterprise'
     services = integration_test_services(edition=edition)
@@ -351,7 +366,7 @@ def get_enterprise_pipelines(trigger, ver_mode):
 
     return pipelines
 
-def get_enterprise2_pipelines(trigger, ver_mode):
+def enterprise2_pipelines(ver_mode=ver_mode, trigger=enterprise2_trigger):
     edition = 'enterprise'
     services = integration_test_services(edition=edition)
     volumes = integration_test_services_volumes()
@@ -521,29 +536,6 @@ def artifacts_page_pipeline():
         'target': 'security',
     }
     return [pipeline(name='publish-artifacts-page', trigger=trigger, steps = [download_grabpl_step(), artifacts_page_step()], edition="all")]
-
-def release_pipelines(ver_mode='release', trigger=None):
-    # 'enterprise' edition services contain both OSS and enterprise services
-    if not trigger:
-        trigger = {
-            'event': {
-                'exclude': [
-                    'promote'
-                ]
-            },
-            'ref': ['refs/tags/v*',],
-        }
-
-    # The release pipelines include also enterprise ones, so both editions are built for a release.
-    # We could also solve this by triggering a downstream build for the enterprise repo, but by including enterprise
-    # in OSS release builds, we simplify the UX for the release engineer.
-    oss_pipelines = get_oss_pipelines(ver_mode=ver_mode, trigger=trigger)
-    enterprise_pipelines = get_enterprise_pipelines(ver_mode=ver_mode, trigger=trigger)
-    enterprise2_pipelines = get_enterprise2_pipelines(ver_mode=ver_mode, trigger=trigger)
-
-    pipelines = oss_pipelines + enterprise_pipelines + enterprise2_pipelines
-
-    return pipelines
 
 def get_e2e_suffix():
     if not disable_tests:

@@ -3544,10 +3544,11 @@ steps:
   name: upload-packages-enterprise2
 trigger:
   event:
-    exclude:
-    - promote
+  - promote
   ref:
   - refs/tags/v*
+  target:
+  - hg
 type: docker
 volumes:
 - host:
@@ -3656,10 +3657,11 @@ steps:
   name: test-backend-enterprise2
 trigger:
   event:
-    exclude:
-    - promote
+  - promote
   ref:
   - refs/tags/v*
+  target:
+  - hg
 type: docker
 volumes:
 - host:
@@ -6235,6 +6237,6 @@ kind: secret
 name: packages_secret_access_key
 ---
 kind: signature
-hmac: 705d832620a82b2009120991daebfd529c7d216c8d2a1b43f39fda57c7dd2e48
+hmac: e8342a0f04268a319c0ca32aeb8dbc5d019c03d2bb6acaf14870989b99e24469
 
 ...
