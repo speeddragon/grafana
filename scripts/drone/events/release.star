@@ -83,7 +83,6 @@ release_trigger = {
     'ref': ['refs/tags/v*',],
 }
 enterprise2_trigger = {
-    'event': ['promote'],
     'target': ['hg'],
     'ref': ['refs/tags/v*',],
 }

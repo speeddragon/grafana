@@ -3543,8 +3543,6 @@ steps:
   image: grafana/grafana-ci-deploy:1.3.3
   name: upload-packages-enterprise2
 trigger:
-  event:
-  - promote
   ref:
   - refs/tags/v*
   target:
@@ -3656,8 +3654,6 @@ steps:
   image: grafana/build-container:1.6.3
   name: test-backend-enterprise2
 trigger:
-  event:
-  - promote
   ref:
   - refs/tags/v*
   target:
@@ -6237,6 +6233,6 @@ kind: secret
 name: packages_secret_access_key
 ---
 kind: signature
-hmac: e8342a0f04268a319c0ca32aeb8dbc5d019c03d2bb6acaf14870989b99e24469
+hmac: 5463a90a8e68f395087674dcdd1b7e42765aae82ed2bc1548eac011a0ea27d89
 
 ...
