@@ -386,18 +386,14 @@ def get_enterprise2_pipelines(trigger, ver_mode):
             build_backend_step(edition=edition2, ver_mode=ver_mode, variants=['linux-amd64']),
         ])
 
-    # Insert remaining steps
-    build_steps.extend([
-        # copy_packages_for_docker_step(),
-        # build_docker_images_step(edition=edition, ver_mode=ver_mode, publish=True),
-        # build_docker_images_step(edition=edition, ver_mode=ver_mode, ubuntu=True, publish=True),
-    ])
 
-    if should_upload:
-        publish_steps.extend([
-            package_step(edition=edition2, ver_mode=ver_mode, include_enterprise2=include_enterprise, variants=['linux-amd64']),
-            upload_cdn_step(edition=edition2, ver_mode=ver_mode),
-        ])
+    build_steps.extend([
+        package_step(edition=edition2, ver_mode=ver_mode, include_enterprise2=include_enterprise, variants=['linux-amd64']),
+        upload_cdn_step(edition=edition2, ver_mode=ver_mode),
+        copy_packages_for_docker_step(edition=edition2),
+        build_docker_images_step(edition=edition2, ver_mode=ver_mode, publish=True),
+        build_docker_images_step(edition=edition2, ver_mode=ver_mode, ubuntu=True, publish=True),
+    ])
 
     if should_upload:
         step = upload_packages_step(edition=edition2, ver_mode=ver_mode)

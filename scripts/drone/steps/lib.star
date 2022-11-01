@@ -752,12 +752,12 @@ def build_docs_website_step():
     }
 
 
-def copy_packages_for_docker_step():
+def copy_packages_for_docker_step(edition=None):
     return {
         'name': 'copy-packages-for-docker',
         'image': build_image,
         'depends_on': [
-            'package',
+            'package' + enterprise2_suffix(edition),
         ],
         'commands': [
             'ls dist/*.tar.gz*',
