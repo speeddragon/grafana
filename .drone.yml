@@ -2208,10 +2208,10 @@ steps:
   - gcloud auth activate-service-account --key-file=gcpkey.json
   - rm gcpkey.json
   - cp C:\App\nssm-2.24.zip .
-  - .\grabpl.exe windows-installer --edition enterprise ${DRONE_TAG}
+  - .\grabpl.exe windows-installer --edition enterprise2 ${DRONE_TAG}
   - $$fname = ((Get-Childitem grafana*.msi -name) -split "`n")[0]
-  - gsutil cp $$fname gs://%PRERELEASE_BUCKET%/artifacts/downloads/${DRONE_TAG}/enterprise/release/
-  - gsutil cp "$$fname.sha256" gs://%PRERELEASE_BUCKET%/artifacts/downloads/${DRONE_TAG}/enterprise/release/
+  - gsutil cp $$fname gs://%PRERELEASE_BUCKET%/artifacts/downloads/${DRONE_TAG}/enterprise2/release/
+  - gsutil cp "$$fname.sha256" gs://%PRERELEASE_BUCKET%/artifacts/downloads/${DRONE_TAG}/enterprise2/release/
   depends_on:
   - windows-init
   environment:
@@ -3439,6 +3439,6 @@ kind: secret
 name: packages_secret_access_key
 ---
 kind: signature
-hmac: af7884d2788a8f0346ae6219a14f2ec7de1572decdcf405e75336a75bbab87fd
+hmac: 597fd64ef72954f64a757c53ac2d0425f9501f46e7a8ac2b3630392c2307fc39
 
 ...
