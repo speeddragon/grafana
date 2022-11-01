@@ -2156,86 +2156,6 @@ volumes:
   name: docker
 ---
 clone:
-  disable: true
-depends_on:
-- release-enterprise2-build-e2e-publish
-- release-enterprise2-test
-image_pull_secrets:
-- dockerconfigjson
-kind: pipeline
-name: release-enterprise2-windows
-platform:
-  arch: amd64
-  os: windows
-  version: "1809"
-services: []
-steps:
-- commands:
-  - echo $env:DRONE_RUNNER_NAME
-  image: mcr.microsoft.com/windows:1809
-  name: identify-runner
-- commands:
-  - $$ProgressPreference = "SilentlyContinue"
-  - Invoke-WebRequest https://grafana-downloads.storage.googleapis.com/grafana-build-pipeline/v3.0.15/windows/grabpl.exe
-    -OutFile grabpl.exe
-  - git clone "https://$$env:GITHUB_TOKEN@github.com/grafana/grafana-enterprise.git"
-  - cd grafana-enterprise
-  - git checkout ${DRONE_TAG}
-  environment:
-    GITHUB_TOKEN:
-      from_secret: github_token
-  image: grafana/ci-wix:0.1.1
-  name: clone
-- commands:
-  - cp -r grafana-enterprise C:\App\grafana-enterprise
-  - rm -r -force grafana-enterprise
-  - cp grabpl.exe C:\App\grabpl.exe
-  - rm -force grabpl.exe
-  - C:\App\grabpl.exe init-enterprise --github-token $$env:GITHUB_TOKEN C:\App\grafana-enterprise
-  - cp C:\App\grabpl.exe grabpl.exe
-  depends_on:
-  - clone
-  environment:
-    GITHUB_TOKEN:
-      from_secret: github_token
-  image: grafana/ci-wix:0.1.1
-  name: windows-init
-- commands:
-  - $$gcpKey = $$env:GCP_KEY
-  - '[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($$gcpKey))
-    > gcpkey.json'
-  - dos2unix gcpkey.json
-  - gcloud auth activate-service-account --key-file=gcpkey.json
-  - rm gcpkey.json
-  - cp C:\App\nssm-2.24.zip .
-  - .\grabpl.exe windows-installer --edition enterprise2 ${DRONE_TAG}
-  - $$fname = ((Get-Childitem grafana*.msi -name) -split "`n")[0]
-  - gsutil cp $$fname gs://%PRERELEASE_BUCKET%/artifacts/downloads/${DRONE_TAG}/enterprise2/release/
-  - gsutil cp "$$fname.sha256" gs://%PRERELEASE_BUCKET%/artifacts/downloads/${DRONE_TAG}/enterprise2/release/
-  depends_on:
-  - windows-init
-  environment:
-    GCP_KEY:
-      from_secret: gcp_key
-    GITHUB_TOKEN:
-      from_secret: github_token
-    PRERELEASE_BUCKET:
-      from_secret: prerelease_bucket
-  image: grafana/ci-wix:0.1.1
-  name: build-windows-installer
-trigger:
-  event:
-    exclude:
-    - promote
-  ref:
-  - refs/tags/v*
-type: docker
-volumes:
-- host:
-    path: /var/run/docker.sock
-  name: docker
----
-clone:
   retries: 3
 depends_on: []
 image_pull_secrets:
@@ -3147,79 +3067,6 @@ volumes:
   name: docker
 ---
 clone:
-  disable: true
-depends_on:
-- release-branch-enterprise2-build-e2e-publish
-- release-branch-enterprise2-test
-image_pull_secrets:
-- dockerconfigjson
-kind: pipeline
-name: release-branch-enterprise2-windows
-platform:
-  arch: amd64
-  os: windows
-  version: "1809"
-services: []
-steps:
-- commands:
-  - echo $env:DRONE_RUNNER_NAME
-  image: mcr.microsoft.com/windows:1809
-  name: identify-runner
-- commands:
-  - $$ProgressPreference = "SilentlyContinue"
-  - Invoke-WebRequest https://grafana-downloads.storage.googleapis.com/grafana-build-pipeline/v3.0.15/windows/grabpl.exe
-    -OutFile grabpl.exe
-  - git clone "https://$$env:GITHUB_TOKEN@github.com/grafana/grafana-enterprise.git"
-  - cd grafana-enterprise
-  - git checkout $$env:DRONE_BRANCH
-  environment:
-    GITHUB_TOKEN:
-      from_secret: github_token
-  image: grafana/ci-wix:0.1.1
-  name: clone
-- commands:
-  - cp -r grafana-enterprise C:\App\grafana-enterprise
-  - rm -r -force grafana-enterprise
-  - cp grabpl.exe C:\App\grabpl.exe
-  - rm -force grabpl.exe
-  - C:\App\grabpl.exe init-enterprise --github-token $$env:GITHUB_TOKEN C:\App\grafana-enterprise
-  - cp C:\App\grabpl.exe grabpl.exe
-  depends_on:
-  - clone
-  environment:
-    GITHUB_TOKEN:
-      from_secret: github_token
-  image: grafana/ci-wix:0.1.1
-  name: windows-init
-- commands:
-  - $$gcpKey = $$env:GCP_KEY
-  - '[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($$gcpKey))
-    > gcpkey.json'
-  - dos2unix gcpkey.json
-  - gcloud auth activate-service-account --key-file=gcpkey.json
-  - rm gcpkey.json
-  - cp C:\App\nssm-2.24.zip .
-  depends_on:
-  - windows-init
-  environment:
-    GCP_KEY:
-      from_secret: gcp_key
-    GITHUB_TOKEN:
-      from_secret: github_token
-    PRERELEASE_BUCKET:
-      from_secret: prerelease_bucket
-  image: grafana/ci-wix:0.1.1
-  name: build-windows-installer
-trigger:
-  ref:
-  - refs/heads/v[0-9]*
-type: docker
-volumes:
-- host:
-    path: /var/run/docker.sock
-  name: docker
----
-clone:
   retries: 3
 kind: pipeline
 name: scan-grafana/grafana:latest-image
@@ -3439,6 +3286,6 @@ kind: secret
 name: packages_secret_access_key
 ---
 kind: signature
-hmac: 597fd64ef72954f64a757c53ac2d0425f9501f46e7a8ac2b3630392c2307fc39
+hmac: b2147dbd545451d80aecc0b08ee2a89d9d8451ec937afb9e8281e82e5a6bd47d
 
 ...

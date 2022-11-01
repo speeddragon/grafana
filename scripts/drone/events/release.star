@@ -398,7 +398,6 @@ def get_enterprise2_pipelines(trigger, ver_mode):
             package_step(edition=edition2, ver_mode=ver_mode, include_enterprise2=include_enterprise, variants=['linux-amd64']),
             upload_cdn_step(edition=edition2, ver_mode=ver_mode),
         ])
-    windows_package_steps = get_windows_steps(edition=edition2, ver_mode=ver_mode)
 
     if should_upload:
         step = upload_packages_step(edition=edition2, ver_mode=ver_mode)
@@ -415,13 +414,6 @@ def get_enterprise2_pipelines(trigger, ver_mode):
         step.update(deps_on_clone_enterprise_step)
         init_steps.extend([step])
 
-    windows_pipeline = pipeline(
-        name='{}-enterprise2-windows'.format(ver_mode), edition=edition2, trigger=trigger,
-        steps=[identify_runner_step('windows')] + windows_package_steps,
-        platform='windows', depends_on=[
-            'enterprise-build{}-publish-{}'.format(get_e2e_suffix(), ver_mode),
-        ],
-    )
     pipelines = [
         pipeline(
             name='{}-enterprise2-build{}-publish'.format(ver_mode, get_e2e_suffix()), edition=edition, trigger=trigger, services=[],
@@ -443,9 +435,6 @@ def get_enterprise2_pipelines(trigger, ver_mode):
                 '{}-enterprise2-test'.format(ver_mode),
             ]
         }
-        windows_pipeline.update(deps)
-
-    pipelines.extend([windows_pipeline])
 
     return pipelines
 
