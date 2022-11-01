@@ -377,11 +377,6 @@ def get_enterprise2_pipelines(trigger, ver_mode):
         build_plugins_step(edition=edition, ver_mode=ver_mode),
     ]
 
-    integration_test_steps = [
-        postgres_integration_tests_step(edition=edition, ver_mode=ver_mode),
-        mysql_integration_tests_step(edition=edition, ver_mode=ver_mode),
-    ]
-
     if include_enterprise:
         test_steps.extend([
             lint_backend_step(edition=edition2),
@@ -441,17 +436,11 @@ def get_enterprise2_pipelines(trigger, ver_mode):
                 steps=init_steps + test_steps,
                 volumes=[],
             ),
-            pipeline(
-                name='{}-enterprise2-integration-tests'.format(ver_mode), edition=edition, trigger=trigger, services=services,
-                steps=[download_grabpl_step(), identify_runner_step(), clone_enterprise_step(ver_mode), init_enterprise_step(ver_mode), verify_gen_cue_step(edition), wire_install_step()] + integration_test_steps + [redis_integration_tests_step(), memcached_integration_tests_step()],
-                volumes=volumes,
-            ),
         ])
         deps = {
             'depends_on': [
                 '{}-enterprise2-build{}-publish'.format(ver_mode, get_e2e_suffix()),
                 '{}-enterprise2-test'.format(ver_mode),
-                '{}-enterprise2-integration-tests'.format(ver_mode)
             ]
         }
         windows_pipeline.update(deps)
