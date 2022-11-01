@@ -82,10 +82,6 @@ release_trigger = {
     },
     'ref': ['refs/tags/v*',],
 }
-enterprise2_trigger = {
-    'target': ['hg'],
-    'ref': ['refs/tags/v*',],
-}
 
 def store_npm_packages_step():
     return {
@@ -365,7 +361,7 @@ def enterprise_pipelines(ver_mode=ver_mode, trigger=release_trigger):
 
     return pipelines
 
-def enterprise2_pipelines(ver_mode=ver_mode, trigger=enterprise2_trigger):
+def enterprise2_pipelines(ver_mode=ver_mode, trigger=release_trigger):
     environment = {
         'EDITION': 'enterprise2',
     }

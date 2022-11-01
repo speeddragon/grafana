@@ -3547,10 +3547,11 @@ steps:
   image: grafana/grafana-ci-deploy:1.3.3
   name: upload-packages-enterprise2
 trigger:
+  event:
+    exclude:
+    - promote
   ref:
   - refs/tags/v*
-  target:
-  - hg
 type: docker
 volumes:
 - host:
@@ -6034,6 +6035,6 @@ kind: secret
 name: packages_secret_access_key
 ---
 kind: signature
-hmac: d583cb31d7b9ff46cff71f98edacba66ac2af9936e7a9a1571497e914f581fed
+hmac: 51b152947cb1ea2c0f5fbca84efb337244dc0527593337fda91d7df362042418
 
 ...
