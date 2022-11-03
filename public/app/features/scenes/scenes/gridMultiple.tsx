@@ -35,24 +35,6 @@ export function getMultipleGridLayoutTest(): Scene {
               pluginId: 'timeseries',
               title: 'Draggable only',
             }),
-            new SceneFlexLayout({
-              isResizable: true,
-              isDraggable: true,
-              size: { x: 6, y: 11, width: 6, height: 10 },
-              direction: 'column',
-              children: [
-                new VizPanel({
-                  size: { ySizing: 'fill' },
-                  pluginId: 'timeseries',
-                  title: 'Fill height',
-                }),
-                new VizPanel({
-                  size: { ySizing: 'fill' },
-                  pluginId: 'timeseries',
-                  title: 'Fill height',
-                }),
-              ],
-            }),
           ],
         }),
 
@@ -75,24 +57,6 @@ export function getMultipleGridLayoutTest(): Scene {
               size: { x: 6, y: 0, width: 6, height: 10 },
               pluginId: 'timeseries',
               title: 'Fill height',
-            }),
-            new SceneFlexLayout({
-              size: { x: 6, y: 11, width: 6, height: 10 },
-              direction: 'column',
-              children: [
-                new VizPanel({
-                  size: { ySizing: 'fill' },
-                  isDraggable: true,
-                  pluginId: 'timeseries',
-                  title: 'Fill height',
-                }),
-                new VizPanel({
-                  isDraggable: true,
-                  size: { ySizing: 'fill' },
-                  pluginId: 'timeseries',
-                  title: 'Fill height',
-                }),
-              ],
             }),
           ],
         }),

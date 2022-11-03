@@ -1,23 +1,15 @@
 import { css, cx } from '@emotion/css';
-import React, { Children, createRef, useEffect, useRef } from 'react';
-import {
-  GridItemHTMLElement,
-  GridStack,
-  GridStackEventHandlerCallback,
-  GridStackEvent,
-  GridStackElement,
-  GridStackNode,
-} from 'gridstack';
+import React, { createRef, useLayoutEffect, useRef } from 'react';
+import { GridItemHTMLElement, GridStack, GridStackEventHandlerCallback, GridStackNode } from 'gridstack';
 import 'gridstack/dist/gridstack.min.css';
 
 import { GrafanaTheme2 } from '@grafana/data';
-import { Icon, useStyles2, useTheme2 } from '@grafana/ui';
+import { Icon, useStyles2 } from '@grafana/ui';
 import { DEFAULT_ROW_HEIGHT, GRID_CELL_HEIGHT, GRID_CELL_VMARGIN, GRID_COLUMN_COUNT } from 'app/core/constants';
 
-import { SceneObjectBase } from '../../core/SceneObjectBase';
+import { SceneObjectBase, sceneObjectsMap } from '../../core/SceneObjectBase';
 import { SceneComponentProps, SceneLayoutChildState, SceneLayoutState, SceneObject } from '../../core/types';
 import { SceneDragHandle } from '../SceneDragHandle';
-import { GridLayoutDragStartEvent, GridLayoutDropEvent } from '../../core/events';
 
 interface SceneGridLayoutState extends SceneLayoutState {
   draggingItem: SceneObject;
@@ -40,23 +32,6 @@ export class SceneGridstackLayout extends SceneObjectBase<SceneGridLayoutState> 
     });
   }
 
-  activate() {
-    this.getRoot().events.subscribe(GridLayoutDragStartEvent, ({ payload }) => {
-      this.setState({ draggingItem: payload.sceneObject });
-    });
-
-    // this.getRoot().events.subscribe(GridLayoutDropEvent, ({ payload }) => {
-    //   const droppedItem = payload.sceneObject;
-    //   // Remove element if previous was on this grid
-    //   const previousChild = this.state.children.find((c) => c.state.key === droppedItem.state.key);
-    //   if (previousChild) {
-    //     this.setState({ children: this.state.children.filter((child) => child.state.key !== previousChild.state.key) });
-    //     return;
-    //   }
-    //   this.setState({ draggingItem: undefined });
-    // });
-  }
-
   updateLayout() {
     /**
      * This forces a re-render through updating the state
@@ -67,12 +42,12 @@ export class SceneGridstackLayout extends SceneObjectBase<SceneGridLayoutState> 
   }
 
   getElementSize(el: GridItemHTMLElement) {
-    return {
-      w: parseInt(el.getAttribute('gs-w') || '0', 10),
-      h: parseInt(el.getAttribute('gs-h') || '0', 10),
-      x: parseInt(el.getAttribute('gs-x') || '0', 10),
-      y: parseInt(el.getAttribute('gs-y') || '0', 10),
-    };
+    // return {
+    //   w: parseInt(el.getAttribute('gs-w') || '0', 10),
+    //   h: parseInt(el.getAttribute('gs-h') || '0', 10),
+    //   x: parseInt(el.getAttribute('gs-x') || '0', 10),
+    //   y: parseInt(el.getAttribute('gs-y') || '0', 10),
+    // };
   }
 
   getElementKey(el: GridItemHTMLElement) {
@@ -84,19 +59,18 @@ export class SceneGridstackLayout extends SceneObjectBase<SceneGridLayoutState> 
   }
 
   onResizeStop: GridStackEventHandlerCallback = (event, el) => {
-    const child = this.state.children.find((c) => c.state.key === this.getElementKey(el));
-    if (!child) {
-      return;
-    }
-    const newSize = this.getElementSize(el);
-
-    child.setState({
-      size: {
-        ...child.state.size,
-        width: newSize.w,
-        height: newSize.h,
-      },
-    });
+    // const child = this.state.children.find((c) => c.state.key === this.getElementKey(el));
+    // if (!child) {
+    //   return;
+    // }
+    // const newSize = this.getElementSize(el);
+    // child.setState({
+    //   size: {
+    //     ...child.state.size,
+    //     width: newSize.w,
+    //     height: newSize.h,
+    //   },
+    // });
   };
 
   onDragStart: GridStackEventHandlerCallback = (event, el) => {
@@ -105,66 +79,116 @@ export class SceneGridstackLayout extends SceneObjectBase<SceneGridLayoutState> 
     if (!child) {
       return;
     }
-    this.getRoot().events.publish(new GridLayoutDragStartEvent({ sceneObject: child }));
+
+    this.setState({
+      children: this.state.children.filter((c) => c.state.key !== child.state.key),
+    });
+    // this.getRoot().events.publish(new GridLayoutDragStartEvent({ sceneObject: child }));
   };
 
   onDragStop: GridStackEventHandlerCallback = (event, el, newEl) => {
     // Update children positions if they have changed
-    const child = this.state.children.find((c) => c.state.key === this.getElementKey(el));
-    if (!child) {
-      return;
-    }
-    const childSize = child.state.size;
-    const childLayout = this.getElementSize(el);
-
-    if (
-      childSize?.x !== childLayout.x ||
-      childSize?.y !== childLayout.y ||
-      childSize?.width !== childLayout.w ||
-      childSize?.height !== childLayout.h
-    ) {
-      child.setState({
-        size: {
-          ...child.state.size,
-          x: childLayout.x,
-          y: childLayout.y,
-        },
-      });
-    }
+    // const child = this.state.children.find((c) => c.state.key === this.getElementKey(el));
+    // if (!child) {
+    //   return;
+    // }
+    // const childSize = child.state.size;
+    // const childLayout = this.getElementSize(el);
+    // if (
+    //   childSize?.x !== childLayout.x ||
+    //   childSize?.y !== childLayout.y ||
+    //   childSize?.width !== childLayout.w ||
+    //   childSize?.height !== childLayout.h
+    // ) {
+    //   child.setState({
+    //     size: {
+    //       ...child.state.size,
+    //       x: childLayout.x,
+    //       y: childLayout.y,
+    //     },
+    //   });
+    // }
   };
 
   onDrop = (event: Event, previousEl: GridStackNode, newEl: GridStackNode) => {
+    console.log('onDrop', this.state.key);
     // Remove element if previous was on this grid
-    const newChild = this.state.draggingItem;
-    this.getRoot().events.publish(new GridLayoutDropEvent({ sceneObject: newChild }));
-
-    this.setState({ children: [...this.state.children, newChild] });
+    // const newChild = this.state.draggingItem;
+    // this.getRoot().events.publish(new GridLayoutDropEvent({ sceneObject: newChild }));
+    // this.setState({ children: [...this.state.children, newChild] });
   };
 
-  onAddItem = (event: Event, newEl: GridStackNode) => {
-    // Remove element if previous was on this grid
-    if (this.state.draggingItem) {
-      this.setState({ children: [...this.state.children, this.state.draggingItem], draggingItem: undefined });
-    }
+  onAdded: GridStackEventHandlerCallback = (event, previousEl) => {};
+
+  onRemoveItem: GridStackEventHandlerCallback = (event, previousEl) => {
+    console.log('removed', event);
+    // if (!previousEl) {
+    //   return;
+    // }
+    // const elId = Array.isArray(previousEl) ? previousEl[0].id : previousEl.id;
+    // if (elId === undefined) {
+    //   return;
+    // }
+    // const [layoutId, childId] = elId.toString().split(':');
+    // // const childId = elId.toString().split(':')[1];
+    // // Remove dragging item if previous was on this grid
+    // const previousChild = this.state.children.find((c) => c.state.key === childId);
+    // if (previousChild && layoutId === this.state.key!) {
+    //   const next = this.state.children.filter((child) => child.state.key !== previousChild.state.key);
+    //   console.log('onRemoveItem', this.state.key, childId, this.state.children, next);
+    //   this.setState({
+    //     children: next,
+    //   });
+    //   return;
+    // }
   };
 
-  onRemoveItem = (event: Event, previousEl: GridStackNode) => {
-    // Remove dragging item if previous was on this grid
-    const previousChild = this.state.children.find((c) => c.state.key === previousEl.id);
-
-    if (previousChild && this.state.draggingItem) {
-      this.setState({
-        children: this.state.children.filter((child) => child.state.key !== previousChild.state.key),
-        draggingItem: undefined,
-      });
+  onDropped: (g: GridStack) => GridStackEventHandlerCallback = (g) => (event, p, n) => {
+    console.log(g.getGridItems());
+    if (!n || !n.id) {
       return;
     }
+    const [layoutId, childId] = n.id.toString().split(':');
+    const layoutObject = sceneObjectsMap.get(layoutId);
+    const childObject = sceneObjectsMap.get(childId);
+
+    // Gridstack creates a DOM element for dropped items, those need to be removed
+    // as they are rendered by React
+    g.getGridItems().forEach((item) => {
+      const layoutId = item.getAttribute('gs-id')?.split(':')[0];
+      if (layoutId !== this.state.key) {
+        g.removeWidget(item);
+      }
+    });
+
+    layoutObject?.setState({
+      children: layoutObject.state.children.filter((child) => child.state.key !== childId),
+    });
+
+    childObject?.setState({
+      size: {
+        ...childObject.state.size,
+        x: n.x,
+        y: n.y,
+      },
+    });
+
+    // console.log('onDropped', p, childObject?.state.size, n);
+
+    this.setState({
+      children: [...this.state.children, childObject],
+    });
+
+    // console.log('onDropped', this.state.key);
+    // console.log('layout');
+    // console.log('child', sceneObjectsMap.get(childId));
   };
 }
 
 function SceneGridLayoutRenderer({ model }: SceneComponentProps<SceneGridstackLayout>) {
   const { children } = model.useState();
-  const refs = useRef({});
+  const refs = useRef<Record<string, React.RefObject<HTMLDivElement>>>({});
+  const gridRef = useRef<GridStack | null>(null);
 
   if (Object.keys(refs.current).length !== children.length) {
     children.forEach(({ state }) => {
@@ -172,8 +196,8 @@ function SceneGridLayoutRenderer({ model }: SceneComponentProps<SceneGridstackLa
     });
   }
 
-  useEffect(() => {
-    const grid = GridStack.init(
+  useLayoutEffect(() => {
+    gridRef.current = GridStack.init(
       {
         // TODO: Use 24 cols
         column: 12,
@@ -189,31 +213,31 @@ function SceneGridLayoutRenderer({ model }: SceneComponentProps<SceneGridstackLa
       `.grid-stack-${model.state.key}`
     );
 
+    const grid = gridRef.current;
+    grid.batchUpdate();
+    grid.removeAll();
+
+    children.forEach(({ state }) => {
+      const childRef = refs.current[state.key!];
+      if (childRef.current) {
+        grid.makeWidget(childRef.current);
+      }
+    });
+    grid.commit();
+
     grid.on('dragstop', model.onDragStop);
     grid.on('dragstart', model.onDragStart);
     grid.on('resizestop', model.onResizeStop);
-
-    // grid.on('dropped', model.onDrop);
-
-    grid.on('added', model.onAddItem);
+    grid.on('dropped', model.onDropped(gridRef.current));
     grid.on('removed', model.onRemoveItem);
+    grid.on('added', model.onAdded);
 
-    grid.removeAll(false);
-
-    // Make this declarative
-    // grid.load(
-    //   children.map((child) => {
-    //     return {
-    //       x: child.state.size?.x,
-    //       y: child.state.size?.y,
-    //       w: child.state.size?.width,
-    //       h: child.state.size?.height,
-    //     };
-    //   })
-    // );
-    children.forEach(({ state }) => {
-      grid.makeWidget(refs.current[state.key].current);
-    });
+    return () => {
+      if (gridRef.current) {
+        // gridRef.current.destroy(false);
+        // gridRef.current = null;
+      }
+    };
   }, [children]);
 
   return (
@@ -222,28 +246,29 @@ function SceneGridLayoutRenderer({ model }: SceneComponentProps<SceneGridstackLa
      * in an element that has the calculated size given by the AutoSizer. The AutoSizer
      * has a width of 0 and will let its content overflow its div.
      */
-    // <div style={{ width: `${width}px`, height: '100%', background }}>
     <div className={`grid-stack grid-stack-${model.state.key}`} style={{ width: '100%', border: '1px solid green' }}>
       {children?.map((item, i) => {
         return (
-          <div
-            ref={refs.current[item.state.key!]}
-            key={item.state.key}
-            className="grid-stack-item"
-            gs-id={item.state.key}
-            gs-w={item.state.size.width}
-            gs-h={item.state.size.height}
-            gs-x={item.state.size.x}
-            gs-y={item.state.size.y}
-          >
-            <div className="grid-stack-item-content" style={{ color: 'white' }}>
-              <item.Component model={item} />
+          <>
+            <div
+              ref={refs.current[item.state.key!]}
+              key={item.state.key}
+              className="grid-stack-item"
+              // id identifies the layout and layout item element for re-wiring children when moving between multiple layouts
+              gs-id={`${model.state.key}:${item.state.key}`}
+              gs-w={item.state.size.width}
+              gs-h={item.state.size.height}
+              gs-x={item.state.size.x}
+              gs-y={item.state.size.y}
+            >
+              <div className="grid-stack-item-content" style={{ color: 'white' }}>
+                <item.Component model={item} />
+              </div>
             </div>
-          </div>
+          </>
         );
       })}
     </div>
-    // </div>
   );
 }
 

@@ -182,6 +182,12 @@ export class Registry<T extends RegistryItem> {
     }
   }
 
+  unregister(id: string) {
+    if (this.byId.has(id)) {
+      this.byId.delete(id);
+      this.ordered = this.ordered.filter((v) => v.id !== id);
+    }
+  }
   private sort() {
     // TODO sort the list
   }

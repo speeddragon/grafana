@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { PageLayoutType } from '@grafana/data';
+import { PageLayoutType, Registry, RegistryItem } from '@grafana/data';
 import { config } from '@grafana/runtime';
 import { PageToolbar, ToolbarButton } from '@grafana/ui';
 import { AppChromeUpdate } from 'app/core/components/AppChrome/AppChromeUpdate';

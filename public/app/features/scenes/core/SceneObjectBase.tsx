@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Observer, Subject, Subscription } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
-import { EventBusSrv } from '@grafana/data';
+import { EventBusSrv, Registry, RegistryItem } from '@grafana/data';
 import { useForceUpdate } from '@grafana/ui';
 
 import { SceneComponentWrapper } from './SceneComponentWrapper';
@@ -101,6 +101,8 @@ export abstract class SceneObjectBase<TState extends SceneObjectState = {}> impl
   activate() {
     this.isActive = true;
 
+    sceneObjectsMap.set(this.state.key!, this);
+
     const { $data } = this.state;
     if ($data && !$data.isActive) {
       $data.activate();
@@ -109,8 +111,10 @@ export abstract class SceneObjectBase<TState extends SceneObjectState = {}> impl
 
   deactivate(): void {
     this.isActive = false;
-
     const { $data } = this.state;
+
+    sceneObjectsMap.delete(this.state.key!);
+
     if ($data && $data.isActive) {
       $data.deactivate();
     }
@@ -231,3 +235,6 @@ function useSceneObjectState<TState extends SceneObjectState>(model: SceneObject
 
   return model.state;
 }
+
+export const sceneObjectsMap = new Map<string, SceneObject>();
+window.tmp = sceneObjectsMap;
