@@ -424,9 +424,9 @@ type Cfg struct {
 
 	Quota QuotaSettings
 
-	DefaultTheme  string
-	DefaultLocale string
-	HomePage      string
+	DefaultTheme    string
+	DefaultLanguage string
+	HomePage        string
 
 	AutoAssignOrg              bool
 	AutoAssignOrgId            int
@@ -1434,7 +1434,7 @@ func readUserSettings(iniFile *ini.File, cfg *Cfg) error {
 	LoginHint = valueAsString(users, "login_hint", "")
 	PasswordHint = valueAsString(users, "password_hint", "")
 	cfg.DefaultTheme = valueAsString(users, "default_theme", "")
-	cfg.DefaultLocale = valueAsString(users, "default_locale", "")
+	cfg.DefaultLanguage = valueAsString(users, "default_language", "")
 	cfg.HomePage = valueAsString(users, "home_page", "")
 	ExternalUserMngLinkUrl = valueAsString(users, "external_manage_link_url", "")
 	ExternalUserMngLinkName = valueAsString(users, "external_manage_link_name", "")
