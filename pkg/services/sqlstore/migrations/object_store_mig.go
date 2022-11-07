@@ -123,6 +123,22 @@ func addObjectStorageMigrations(mg *migrator.Migrator) {
 		},
 	})
 
+	// Keep track of changes so we can keep resolving after a rename
+	tables = append(tables, migrator.Table{
+		Name: "object_alias",
+		Columns: []*migrator.Column{
+			getKeyColumn("old_path", true),
+			getKeyColumn("new_path", false),
+
+			// Who changed what when
+			{Name: "updated_at", Type: migrator.DB_BigInt, Nullable: false},
+			{Name: "updated_by", Type: migrator.DB_NVarchar, Length: 190, Nullable: false},
+		},
+		Indices: []*migrator.Index{
+			{Cols: []string{"new_path"}, Type: migrator.IndexType},
+		},
+	})
+
 	// !!! This should not run in production!
 	// The object store SQL schema is still in active development and this
 	// will only be called when the feature toggle is enabled
@@ -134,7 +150,7 @@ func addObjectStorageMigrations(mg *migrator.Migrator) {
 	// Migration cleanups: given that this is a complex setup
 	// that requires a lot of testing before we are ready to push out of dev
 	// this script lets us easy wipe previous changes and initialize clean tables
-	suffix := " (v2)" // change this when we want to wipe and reset the object tables
+	suffix := " (v3)" // change this when we want to wipe and reset the object tables
 	mg.AddMigration("ObjectStore init: cleanup"+suffix, migrator.NewRawSQLMigration(strings.TrimSpace(`
 		DELETE FROM migration_log WHERE migration_id LIKE 'ObjectStore init%';
 	`)))

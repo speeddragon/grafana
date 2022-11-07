@@ -47,13 +47,16 @@ message RawObject {
   // Raw bytes of the storage object.  The kind will determine what is a valid payload
   bytes body = 8;
 
+  // If the object uid has changed, we may want to resolve old paths
+  repeated string alias = 9;
+
   // The version will change when the object is saved. It is not necessarily sortable
   //
   // NOTE: currently managed by the dashboard+dashboard_version tables
-  string version = 9;
+  string version = 10;
 
   // External location info
-  RawObjectSyncInfo sync = 10;
+  RawObjectSyncInfo sync = 11;
 }
 
 message RawObjectSyncInfo {
