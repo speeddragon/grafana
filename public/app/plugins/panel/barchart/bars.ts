@@ -416,8 +416,11 @@ export function getConfig(opts: BarsOptions, theme: GrafanaTheme2) {
   const init = (u: uPlot) => {
     let over = u.over;
     over.style.overflow = 'hidden';
+
     u.root.querySelectorAll('.u-cursor-pt').forEach((el) => {
-      (el as HTMLElement).style.borderRadius = '0';
+      if (el instanceof HTMLElement) {
+        el.style.borderRadius = '0';
+      }
     });
   };
 
