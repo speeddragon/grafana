@@ -68,7 +68,7 @@ export const SimulationQueryEditor = ({ onChange, query, ds }: EditorProps) => {
       return;
     }
 
-    onUpdateKey({ ...simKey, uid: e.target.value });
+    onUpdateKey({ ...simKey, uid: e.target.value || undefined });
   };
 
   const onTickChanged = (e: FormEvent<HTMLInputElement>) => {

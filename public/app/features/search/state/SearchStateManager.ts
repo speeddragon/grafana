@@ -105,7 +105,10 @@ export class SearchStateManager extends StateManagerBase<SearchState> {
   };
 
   onStarredFilterChange = (e: FormEvent<HTMLInputElement>) => {
-    const starred = (e.target as HTMLInputElement).checked;
+    if (!(e.target instanceof HTMLInputElement)) {
+      return;
+    }
+    const starred = e.target.checked;
     this.setStateAndDoSearch({ starred });
   };
 
