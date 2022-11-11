@@ -123,23 +123,31 @@ export const QueryEditor = ({ query, datasource, onChange, onRunQuery }: Props) 
     onUpdate(update);
   };
 
-  const onInputChange = (e: FormEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target as HTMLInputElement | HTMLTextAreaElement;
+  const onInputChange = (e: FormEvent) => {
+    if (!(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+      return;
+    }
+
+    const { name, value, type } = e.target;
     let newValue: any = value;
 
     if (type === 'number') {
       newValue = Number(value);
     }
 
-    if (name === 'levelColumn') {
-      newValue = (e.target as HTMLInputElement).checked;
+    if (e.target instanceof HTMLInputElement && name === 'levelColumn') {
+      newValue = e.target.checked;
     }
 
     onUpdate({ ...query, [name]: newValue });
   };
 
-  const onFieldChange = (field: string) => (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type } = e.target as HTMLInputElement;
+  const onFieldChange = (field: string) => (e: ChangeEvent) => {
+    if (!(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+      return;
+    }
+
+    const { name, value, type } = e.target;
     let newValue: any = value;
 
     if (type === 'number') {

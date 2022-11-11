@@ -60,8 +60,11 @@ export const SimulationSchemaForm = ({ config, schema, onChange }: SchemaFormPro
   const styles = useStyles2(getStyles);
 
   const onUpdateTextArea = (event: FormEvent<HTMLTextAreaElement>) => {
-    const element = event.target as HTMLInputElement;
-    onChange(JSON.parse(element.value));
+    if (!(event.target instanceof HTMLTextAreaElement)) {
+      return;
+    }
+
+    onChange(JSON.parse(event.target.value));
   };
 
   return (

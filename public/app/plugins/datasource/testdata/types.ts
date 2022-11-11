@@ -1,5 +1,13 @@
 import { DataQuery } from '@grafana/data';
 
+import { TestDataDataSource } from './datasource';
+
+export interface QueryTypeEditorProps {
+  onChange: (query: TestDataQuery) => void;
+  query: TestDataQuery;
+  ds: TestDataDataSource;
+}
+
 export interface Scenario {
   id: string;
   name: string;
