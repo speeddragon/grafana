@@ -10,7 +10,7 @@ import (
 
 // swagger:route GET /api/v1/provisioning/alert-rules/export provisioning stable RouteGetAlertRulesExport
 //
-// Get all alert rules groups in provisioning file format.
+// Export all alert rules in provisioning file format.
 //
 //     Responses:
 //       200: AlertRuleFileExport
@@ -26,7 +26,7 @@ import (
 
 // swagger:route GET /api/v1/provisioning/alert-rules/{UID}/export provisioning stable RouteGetAlertRuleExport
 //
-// Export a rule in provisioning file format.
+// Export an alert rule in provisioning file format.
 //
 //     Produces:
 //     - application/json
@@ -172,7 +172,7 @@ func NewAlertRule(rule models.AlertRule, provenance models.Provenance) Provision
 
 // swagger:route GET /api/v1/provisioning/folder/{FolderUID}/rule-groups/{Group}/export provisioning stable RouteGetAlertRuleGroupExport
 //
-// Export a rule group in provisioning file format.
+// Export an alert rule group in provisioning file format.
 //
 //     Produces:
 //     - application/json
