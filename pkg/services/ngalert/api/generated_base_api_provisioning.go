@@ -24,7 +24,10 @@ type ProvisioningApi interface {
 	RouteDeleteMuteTiming(*models.ReqContext) response.Response
 	RouteDeleteTemplate(*models.ReqContext) response.Response
 	RouteGetAlertRule(*models.ReqContext) response.Response
+	RouteGetAlertRuleExport(*models.ReqContext) response.Response
 	RouteGetAlertRuleGroup(*models.ReqContext) response.Response
+	RouteGetAlertRuleGroupExport(*models.ReqContext) response.Response
+	RouteGetAlertRulesExport(*models.ReqContext) response.Response
 	RouteGetContactpoints(*models.ReqContext) response.Response
 	RouteGetMuteTiming(*models.ReqContext) response.Response
 	RouteGetMuteTimings(*models.ReqContext) response.Response
@@ -68,11 +71,25 @@ func (f *ProvisioningApiHandler) RouteGetAlertRule(ctx *models.ReqContext) respo
 	uIDParam := web.Params(ctx.Req)[":UID"]
 	return f.handleRouteGetAlertRule(ctx, uIDParam)
 }
+func (f *ProvisioningApiHandler) RouteGetAlertRuleExport(ctx *models.ReqContext) response.Response {
+	// Parse Path Parameters
+	uIDParam := web.Params(ctx.Req)[":UID"]
+	return f.handleRouteGetAlertRuleExport(ctx, uIDParam)
+}
 func (f *ProvisioningApiHandler) RouteGetAlertRuleGroup(ctx *models.ReqContext) response.Response {
 	// Parse Path Parameters
 	folderUIDParam := web.Params(ctx.Req)[":FolderUID"]
 	groupParam := web.Params(ctx.Req)[":Group"]
 	return f.handleRouteGetAlertRuleGroup(ctx, folderUIDParam, groupParam)
+}
+func (f *ProvisioningApiHandler) RouteGetAlertRuleGroupExport(ctx *models.ReqContext) response.Response {
+	// Parse Path Parameters
+	folderUIDParam := web.Params(ctx.Req)[":FolderUID"]
+	groupParam := web.Params(ctx.Req)[":Group"]
+	return f.handleRouteGetAlertRuleGroupExport(ctx, folderUIDParam, groupParam)
+}
+func (f *ProvisioningApiHandler) RouteGetAlertRulesExport(ctx *models.ReqContext) response.Response {
+	return f.handleRouteGetAlertRulesExport(ctx)
 }
 func (f *ProvisioningApiHandler) RouteGetContactpoints(ctx *models.ReqContext) response.Response {
 	return f.handleRouteGetContactpoints(ctx)
@@ -236,12 +253,42 @@ func (api *API) RegisterProvisioningApiEndpoints(srv ProvisioningApi, m *metrics
 			),
 		)
 		group.Get(
+			toMacaronPath("/api/v1/provisioning/alert-rules/{UID}/export"),
+			api.authorize(http.MethodGet, "/api/v1/provisioning/alert-rules/{UID}/export"),
+			metrics.Instrument(
+				http.MethodGet,
+				"/api/v1/provisioning/alert-rules/{UID}/export",
+				srv.RouteGetAlertRuleExport,
+				m,
+			),
+		)
+		group.Get(
 			toMacaronPath("/api/v1/provisioning/folder/{FolderUID}/rule-groups/{Group}"),
 			api.authorize(http.MethodGet, "/api/v1/provisioning/folder/{FolderUID}/rule-groups/{Group}"),
 			metrics.Instrument(
 				http.MethodGet,
 				"/api/v1/provisioning/folder/{FolderUID}/rule-groups/{Group}",
 				srv.RouteGetAlertRuleGroup,
+				m,
+			),
+		)
+		group.Get(
+			toMacaronPath("/api/v1/provisioning/folder/{FolderUID}/rule-groups/{Group}/export"),
+			api.authorize(http.MethodGet, "/api/v1/provisioning/folder/{FolderUID}/rule-groups/{Group}/export"),
+			metrics.Instrument(
+				http.MethodGet,
+				"/api/v1/provisioning/folder/{FolderUID}/rule-groups/{Group}/export",
+				srv.RouteGetAlertRuleGroupExport,
+				m,
+			),
+		)
+		group.Get(
+			toMacaronPath("/api/v1/provisioning/alert-rules/export"),
+			api.authorize(http.MethodGet, "/api/v1/provisioning/alert-rules/export"),
+			metrics.Instrument(
+				http.MethodGet,
+				"/api/v1/provisioning/alert-rules/export",
+				srv.RouteGetAlertRulesExport,
 				m,
 			),
 		)
